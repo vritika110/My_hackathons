@@ -1,6 +1,7 @@
 {
   "name": "hackathon-manager",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "description": "Personal hackathon tracking dashboard with AI extraction, deadline alerts, and team management",
   "scripts": {
@@ -8,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check-alerts": "node -e \"fetch('http://localhost:3000/api/alerts', {headers:{authorization:'Bearer demo-cron-secret'}}).then(r=>r.json()).then(console.log).catch(console.error)\""
+    "check-alerts": "node scripts/deadline-alert-worker.js --once",
+    "alert-worker": "node scripts/deadline-alert-worker.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
