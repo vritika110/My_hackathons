@@ -7,21 +7,12 @@
     "registrationDeadline": "2026-11-15",
     "submissionDeadline": "2026-11-17",
     "prizePool": "$50,000",
-    "teamMembers": ["Priya S.", "Rahul K.", "Ananya M."],
+    "teamMembers": [
+      "Priya S.",
+      "Rahul K.",
+      "Ananya M."
+    ],
     "description": "Annual MIT hackathon bringing together the brightest minds to build innovative solutions.",
-    "status": "upcoming",
-    "createdAt": "2026-11-01T00:00:00Z"
-  },
-  {
-    "id": "demo-2",
-    "name": "Google DevFest Hack",
-    "platform": "Google / Devpost",
-    "platformUrl": "https://developers.google.com",
-    "registrationDeadline": "2026-11-20",
-    "submissionDeadline": "2026-11-22",
-    "prizePool": "$25,000",
-    "teamMembers": ["Sneha R.", "Vikram T."],
-    "description": "Google-sponsored hackathon focused on AI/ML applications and Google Cloud integration.",
     "status": "upcoming",
     "createdAt": "2026-11-01T00:00:00Z"
   },
@@ -33,7 +24,9 @@
     "registrationDeadline": "2026-12-01",
     "submissionDeadline": "2026-12-03",
     "prizePool": "$100,000",
-    "teamMembers": ["Arjun N."],
+    "teamMembers": [
+      "Arjun N."
+    ],
     "description": "India's biggest Ethereum hackathon. Build decentralized apps and earn crypto prizes.",
     "status": "upcoming",
     "createdAt": "2026-11-01T00:00:00Z"

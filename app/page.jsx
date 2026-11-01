@@ -1,11 +1,8 @@
 "use client";
-import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import {
   Plus,
   Zap,
-  LogOut,
   Bell,
   Trophy,
   Users,
@@ -15,17 +12,13 @@ import {
   RefreshCw,
   Camera,
   ChevronDown,
+  ShieldCheck,
 } from "lucide-react";
 import HackathonCard from "@/components/HackathonCard";
 import AddHackathonModal from "@/components/AddHackathonModal";
 import ScreenshotUploader from "@/components/ScreenshotUploader";
 
-const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
-
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
   const [hackathons, setHackathons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -35,18 +28,6 @@ export default function DashboardPage() {
   const [sort, setSort] = useState("registrationDeadline");
   const [alertStatus, setAlertStatus] = useState(null);
   const [alertLoading, setAlertLoading] = useState(false);
-
-  const isDemo =
-    DEMO_MODE ||
-    (typeof window !== "undefined" &&
-      window.localStorage?.getItem("hacktracker_demo") === "true");
-
-  // Auth guard
-  useEffect(() => {
-    if (status === "unauthenticated" && !isDemo) {
-      router.push("/login");
-    }
-  }, [status, isDemo, router]);
 
   const fetchHackathons = useCallback(async () => {
     setLoading(true);
@@ -61,11 +42,10 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // Direct load — no login required
   useEffect(() => {
-    if (status === "authenticated" || isDemo) {
-      fetchHackathons();
-    }
-  }, [status, isDemo, fetchHackathons]);
+    fetchHackathons();
+  }, [fetchHackathons]);
 
   const handleAdd = (newHackathon) => {
     setHackathons((prev) => [newHackathon, ...prev]);
@@ -81,24 +61,16 @@ export default function DashboardPage() {
     setShowModal(true);
   };
 
-  const handleSignOut = () => {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem("hacktracker_demo");
-    }
-    signOut({ callbackUrl: "/login" });
-  };
-
   const handleTestAlerts = async () => {
     setAlertLoading(true);
     setAlertStatus(null);
     try {
-      const res = await fetch("/api/alerts", {
-        headers: {
-          authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || "demo-cron-secret"}`,
-        },
-      });
+      const res = await fetch("/api/alerts");
       const data = await res.json();
-      setAlertStatus({ ok: res.ok, message: data.message || data.error });
+      setAlertStatus({
+        ok: res.ok,
+        message: data.message || (res.ok ? "Alert check completed" : "Alert error"),
+      });
     } catch (err) {
       setAlertStatus({ ok: false, message: err.message });
     } finally {
@@ -147,17 +119,6 @@ export default function DashboardPage() {
     hackathons.flatMap((h) => h.teamMembers || [])
   ).size;
 
-  if (status === "loading" && !isDemo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#080812]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 text-sm">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#080812]">
       {/* Background orbs */}
@@ -174,31 +135,28 @@ export default function DashboardPage() {
             <div>
               <h1 className="font-bold text-white text-base leading-none">HackTracker</h1>
               <p className="text-[10px] text-slate-500 leading-none mt-0.5">
-                {session?.user?.name || "vritika110@gmail.com"}
+                vritika110@gmail.com
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* User badge */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
+              <span>vritika110@gmail.com</span>
+            </div>
+
             {/* Test alerts button */}
             <button
               id="test-alerts-btn"
               onClick={handleTestAlerts}
               disabled={alertLoading}
               title="Run deadline alert check"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-ghost text-xs"
-            >
-              <Bell className="w-3.5 h-3.5" />
-              {alertLoading ? "Checking..." : "Test Alerts"}
-            </button>
-
-            <button
-              id="sign-out-btn"
-              onClick={handleSignOut}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-ghost text-xs"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <Bell className="w-3.5 h-3.5 text-amber-400" />
+              <span>{alertLoading ? "Checking..." : "Test Alerts"}</span>
             </button>
           </div>
         </div>
