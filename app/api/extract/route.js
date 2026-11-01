@@ -1,6 +1,19 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const DEMO_MODE = process.env.DEMO_MODE === "true";
+function normalizeDate(dateVal) {
+  if (!dateVal || typeof dateVal !== "string") return "";
+  const trimmed = dateVal.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  try {
+    const parsed = new Date(trimmed);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split("T")[0];
+    }
+  } catch {}
+  return "";
+}
 
 export async function POST(request) {
   try {
@@ -11,16 +24,19 @@ export async function POST(request) {
       return Response.json({ error: "No image provided" }, { status: 400 });
     }
 
-    // Demo mode: return mock extracted data
-    if (DEMO_MODE || !process.env.GEMINI_API_KEY) {
+    // Demo mode or missing API key fallback
+    if (!process.env.GEMINI_API_KEY) {
       return Response.json({
         extracted: {
-          name: "Sample Hackathon (Demo Extract)",
+          name: "ETHGlobal AI Hackathon (Demo OCR)",
           platform: "Devpost",
-          registrationDeadline: "2026-12-10",
-          submissionDeadline: "2026-12-12",
-          prizePool: "$10,000",
-          description: "Demo extraction — connect Gemini API key for real OCR.",
+          platformUrl: "https://ethglobal.com",
+          registrationDeadline: "2026-11-20",
+          submissionDeadline: "2026-11-22",
+          prizePool: "$75,000",
+          teamMembers: ["Vritika (Lead)", "Alex M."],
+          description:
+            "Demo OCR extract — set GEMINI_API_KEY in .env.local for live Gemini Vision extraction.",
         },
         demo: true,
       });
@@ -33,20 +49,27 @@ export async function POST(request) {
     const mimeType = file.type || "image/png";
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    });
 
-    const prompt = `You are an expert at extracting hackathon information from images.
-Analyze this hackathon advertisement/flyer image and extract the following fields.
-Return ONLY a valid JSON object with these exact keys:
+    const prompt = `You are an expert OCR and data extractor for hackathons.
+Analyze this flyer, advertisement, or screenshot of a hackathon and extract the key information.
+Output ONLY a JSON object matching this schema:
 {
-  "name": "hackathon name",
-  "platform": "hosting platform or website",
-  "registrationDeadline": "YYYY-MM-DD format or null",
-  "submissionDeadline": "YYYY-MM-DD format or null",
-  "prizePool": "prize amount as string or null",
-  "description": "brief description or null"
+  "name": "string (name of the hackathon)",
+  "platform": "string (Devpost, Devfolio, Unstop, etc.) or null",
+  "platformUrl": "string (website URL) or null",
+  "registrationDeadline": "string in YYYY-MM-DD format or null",
+  "submissionDeadline": "string in YYYY-MM-DD format or null",
+  "prizePool": "string (total prize money or perks) or null",
+  "teamMembers": ["array of team member names if listed"] or [],
+  "description": "brief description or theme of the hackathon" or null
 }
-If you cannot find a field, set it to null. Do not include any explanation, only the JSON.`;
+If a field is not found in the image, set it to null (or [] for teamMembers). Do not guess dates without evidence in the image.`;
 
     const result = await model.generateContent([
       prompt,
@@ -58,21 +81,38 @@ If you cannot find a field, set it to null. Do not include any explanation, only
       },
     ]);
 
-    const text = result.response.text();
+    const rawText = result.response.text();
+    let extracted;
 
-    // Extract JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return Response.json(
-        { error: "Could not parse AI response", raw: text },
-        { status: 422 }
+    try {
+      extracted = JSON.parse(rawText);
+    } catch {
+      // Fallback clean regex in case markdown fences are returned
+      const match = rawText.match(/\{[\s\S]*\}/);
+      if (!match) {
+        return Response.json(
+          { error: "Could not parse JSON from AI model", raw: rawText },
+          { status: 422 }
+        );
+      }
+      extracted = JSON.parse(match[0]);
+    }
+
+    // Normalize date fields to YYYY-MM-DD for standard HTML date inputs
+    if (extracted.registrationDeadline) {
+      extracted.registrationDeadline = normalizeDate(
+        extracted.registrationDeadline
+      );
+    }
+    if (extracted.submissionDeadline) {
+      extracted.submissionDeadline = normalizeDate(
+        extracted.submissionDeadline
       );
     }
 
-    const extracted = JSON.parse(jsonMatch[0]);
     return Response.json({ extracted, demo: false });
   } catch (error) {
-    console.error("Extract error:", error);
+    console.error("Extract route error:", error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
