@@ -5,8 +5,8 @@
   "private": true,
   "description": "Personal hackathon tracking dashboard with AI extraction, deadline alerts, and team management",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "check-alerts": "node scripts/deadline-alert-worker.js --once",
