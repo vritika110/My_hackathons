@@ -36,12 +36,17 @@ export default function DashboardPage() {
   const [alertStatus, setAlertStatus] = useState(null);
   const [alertLoading, setAlertLoading] = useState(false);
 
+  const isDemo =
+    DEMO_MODE ||
+    (typeof window !== "undefined" &&
+      window.localStorage?.getItem("hacktracker_demo") === "true");
+
   // Auth guard
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (status === "unauthenticated" && !isDemo) {
       router.push("/login");
     }
-  }, [status, router]);
+  }, [status, isDemo, router]);
 
   const fetchHackathons = useCallback(async () => {
     setLoading(true);
@@ -57,10 +62,10 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (status === "authenticated" || DEMO_MODE) {
+    if (status === "authenticated" || isDemo) {
       fetchHackathons();
     }
-  }, [status, fetchHackathons]);
+  }, [status, isDemo, fetchHackathons]);
 
   const handleAdd = (newHackathon) => {
     setHackathons((prev) => [newHackathon, ...prev]);
@@ -74,6 +79,13 @@ export default function DashboardPage() {
     setPrefillData(data);
     setShowUploader(false);
     setShowModal(true);
+  };
+
+  const handleSignOut = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("hacktracker_demo");
+    }
+    signOut({ callbackUrl: "/login" });
   };
 
   const handleTestAlerts = async () => {
@@ -135,7 +147,7 @@ export default function DashboardPage() {
     hackathons.flatMap((h) => h.teamMembers || [])
   ).size;
 
-  if (status === "loading") {
+  if (status === "loading" && !isDemo) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#080812]">
         <div className="text-center">
@@ -182,7 +194,7 @@ export default function DashboardPage() {
 
             <button
               id="sign-out-btn"
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleSignOut}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-ghost text-xs"
             >
               <LogOut className="w-3.5 h-3.5" />

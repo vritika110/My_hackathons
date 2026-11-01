@@ -19,8 +19,10 @@ export default function LoginPage() {
   };
 
   const handleDemoSignIn = () => {
-    // For demo mode — just navigate home (demo session is injected server-side)
-    window.location.href = "/";
+    if (typeof window !== "undefined") {
+      localStorage.setItem("hacktracker_demo", "true");
+    }
+    router.push("/");
   };
 
   if (status === "loading") {
