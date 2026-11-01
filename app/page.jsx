@@ -280,9 +280,12 @@ export default function DashboardPage() {
 
         {/* ── HACKATHON GRID ── */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden border border-violet-500/10 h-64 shimmer" />
+              <div
+                key={i}
+                className="rounded-2xl border border-slate-700/60 bg-slate-800/80 h-72 shimmer"
+              />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -312,10 +315,11 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <p className="text-xs text-slate-600 mb-4">
-              Showing {filtered.length} of {hackathons.length} hackathon{hackathons.length !== 1 ? "s" : ""}
+            <p className="text-xs text-slate-400 mb-4 font-medium">
+              Showing {filtered.length} of {hackathons.length} hackathon
+              {hackathons.length !== 1 ? "s" : ""}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((hackathon, i) => (
                 <HackathonCard
                   key={hackathon.id}
