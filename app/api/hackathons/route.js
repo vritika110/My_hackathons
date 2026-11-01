@@ -14,6 +14,7 @@ async function readData() {
 }
 
 async function writeData(data) {
+  await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
   await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
@@ -47,7 +48,7 @@ export async function POST(request) {
       createdAt: new Date().toISOString(),
     };
 
-    hackathons.push(newHackathon);
+    hackathons.unshift(newHackathon);
     await writeData(hackathons);
 
     return Response.json(newHackathon, { status: 201 });
