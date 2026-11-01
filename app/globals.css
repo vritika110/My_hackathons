@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Space Grotesk for headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-space), var(--font-inter), sans-serif;
+  letter-spacing: -0.02em;
+}
+
 :root {
   --bg-primary: #080812;
   --bg-secondary: #0f0f1e;
