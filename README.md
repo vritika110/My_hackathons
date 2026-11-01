@@ -4,6 +4,8 @@
 
 ![HackTracker Screenshot](public/og-preview.png)
 
+[Live Website](https://myhackathons.vercel.app/)
+
 ## ✨ Features
 
 - 🔐 **Google OAuth Authentication** — Locked exclusively to `vritika110@gmail.com`
