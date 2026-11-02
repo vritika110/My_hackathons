@@ -11,3 +11,4 @@ google-genai>=1.0         # Gemini Vision for screenshot extraction
 pytest
 httpx
 aiosmtpd
+psycopg-binary
