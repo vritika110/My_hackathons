@@ -1,30 +1,20 @@
-import { checkAndSendDeadlineAlerts } from "@/lib/alerts";
+import { forward } from "@/lib/backend";
 
-export async function GET(request) {
-  // Check authorization header for cron jobs if CRON_SECRET is configured
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET || "demo-cron-secret";
-  const isDemo = process.env.DEMO_MODE === "true";
+export const dynamic = "force-dynamic";
 
-  // Allow call if cron secret matches or in demo mode
-  if (authHeader !== `Bearer ${cronSecret}` && !isDemo) {
-    // Also allow internal dashboard test clicks
-    const referer = request.headers.get("referer");
-    if (!referer) {
-      return Response.json({ error: "Unauthorized cron trigger" }, { status: 401 });
-    }
+// Called by (a) the Vercel cron in vercel.json, with "Authorization: Bearer <CRON_SECRET>",
+// and (b) the "Test Alerts" button on the dashboard.
+async function handle(request) {
+  const cronSecret = process.env.CRON_SECRET;
+  const bearer = request.headers.get("authorization") === `Bearer ${cronSecret}`;
+  const fromDashboard = !!request.headers.get("referer"); // same-origin click on the dashboard button
+
+  if (!(cronSecret && bearer) && !fromDashboard) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  try {
-    const result = await checkAndSendDeadlineAlerts();
-    return Response.json(result);
-  } catch (error) {
-    console.error("Alert route error:", error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
+  const test = new URL(request.url).searchParams.get("test") === "true";
+  return forward(`/api/alerts${test ? "?test=true" : ""}`);
 }
 
-export async function POST(request) {
-  // Allow manual trigger via POST as well
-  return GET(request);
-}
+export const GET = handle;
+export const POST = handle;

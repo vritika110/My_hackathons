@@ -9,8 +9,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "check-alerts": "node scripts/deadline-alert-worker.js --once",
-    "alert-worker": "node scripts/deadline-alert-worker.js"
+    "check-alerts": "curl -s http://127.0.0.1:8000/api/alerts",
+    "backend": "cd backend && uvicorn app.main:app --reload --port 8000"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

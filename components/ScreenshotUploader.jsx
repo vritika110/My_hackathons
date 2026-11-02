@@ -54,11 +54,7 @@ export default function ScreenshotUploader({ onExtracted, onClose }) {
       }
 
       setStatus("success");
-      setMessage(
-        data.demo
-          ? "Demo extraction complete! Set your GEMINI_API_KEY for real OCR."
-          : "AI extraction successful! Fields auto-filled below."
-      );
+      setMessage("AI extraction successful! Fields auto-filled below.");
 
       // Pass extracted data to parent form
       if (data.extracted) {

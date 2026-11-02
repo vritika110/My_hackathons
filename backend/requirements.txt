@@ -1,0 +1,13 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0
+psycopg2-binary>=2.9      # only used when DATABASE_URL points to Postgres
+python-multipart>=0.0.9   # image upload (multipart/form-data)
+python-dotenv>=1.0
+python-dateutil>=2.9
+tzdata
+google-genai>=1.0         # Gemini Vision for screenshot extraction
+# --- tests only ---
+pytest
+httpx
+aiosmtpd

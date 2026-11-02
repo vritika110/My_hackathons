@@ -44,3 +44,15 @@ next-env.d.ts
 # Data: track the seed file but not prod data changes
 # (Uncomment the line below to stop tracking hackathon data in git)
 # data/hackathons.json
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+

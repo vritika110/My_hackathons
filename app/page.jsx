@@ -62,14 +62,15 @@ export default function DashboardPage() {
   };
 
   const handleTestAlerts = async () => {
+    // sends a REAL test email so you can confirm mail delivery
     setAlertLoading(true);
     setAlertStatus(null);
     try {
-      const res = await fetch("/api/alerts");
+      const res = await fetch("/api/alerts?test=true");
       const data = await res.json();
       setAlertStatus({
         ok: res.ok,
-        message: data.message || (res.ok ? "Alert check completed" : "Alert error"),
+        message: data.message || data.error || (res.ok ? "Alert check completed" : "Alert error"),
       });
     } catch (err) {
       setAlertStatus({ ok: false, message: err.message });
@@ -152,11 +153,11 @@ export default function DashboardPage() {
               id="test-alerts-btn"
               onClick={handleTestAlerts}
               disabled={alertLoading}
-              title="Run deadline alert check"
+              title="Sends a real test email to your alert address"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-ghost text-xs"
             >
               <Bell className="w-3.5 h-3.5 text-amber-400" />
-              <span>{alertLoading ? "Checking..." : "Test Alerts"}</span>
+              <span>{alertLoading ? "Sending..." : "Send Test Email"}</span>
             </button>
           </div>
         </div>
